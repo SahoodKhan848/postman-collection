@@ -1,0 +1,34 @@
+name: Run API Tests
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman
+        run: npm install -g newman newman-reporter-html
+
+      - name: Run Postman Collection
+        run: |
+          newman run "Booking List.postman_collection.json" \
+          -e Production.postman_environment.json \
+          -r cli,html \
+          --reporter-html-export report.html
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: API-Test-Report
+          path: report.html
