@@ -1,0 +1,262 @@
+{
+  "info": {
+    "_postman_id": "85d07943-5a88-4730-8076-a6a15193f275",
+    "name": "Booking List",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "33282673"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Create Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"request should be successful\", function () {\r",
+                  "    pm.expect(pm.response.json().token).to.not.be.null;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Token is present in the response\", function () {\r",
+                  "    pm.expect(pm.response.json().token).to.not.be.undefined;\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Token is a string\", function () {\r",
+                  "    pm.expect(pm.response.json().token).to.be.a('string');\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"password123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Get Booking Ids",
+      "item": [
+        {
+          "name": "All Bookings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "let response = pm.response.json();\r",
+                  "\r",
+                  "// Get all booking IDs\r",
+                  "let bookingIds = response.map(item => item.bookingid);\r",
+                  "\r",
+                  "// Pick random ID\r",
+                  "let randomId = bookingIds[Math.floor(Math.random() * bookingIds.length)];\r",
+                  "\r",
+                  "// Store in collection variable\r",
+                  "pm.collectionVariables.set(\"bookingId\", randomId);\r",
+                  "\r",
+                  "console.log(\"Random Booking ID:\", randomId);\r",
+                  "\r",
+                  "pm.test(\"Request is successful\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Response body is an array\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"First element has bookingid\", function () {\r",
+                  "    pm.expect(pm.response.json()[0]).to.have.property(\"bookingid\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/booking",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "booking"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Booking Details By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Request is successful\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "const schema = {\r",
+                  "    type: \"object\",\r",
+                  "    properties: {\r",
+                  "        firstname: { type: \"string\" },\r",
+                  "        lastname: { type: \"string\" },\r",
+                  "        totalprice: { \r",
+                  "            type: \"integer\",\r",
+                  "            minimum: 0\r",
+                  "        },\r",
+                  "        depositpaid: { type: \"boolean\" },\r",
+                  "        bookingdates: {\r",
+                  "            type: \"object\",\r",
+                  "            properties: {\r",
+                  "                checkin: { \r",
+                  "                    type: \"string\",\r",
+                  "                    format: \"date\"\r",
+                  "                },\r",
+                  "                checkout: { \r",
+                  "                    type: \"string\",\r",
+                  "                    format: \"date\"\r",
+                  "                }\r",
+                  "            },\r",
+                  "            required: [\"checkin\", \"checkout\"],\r",
+                  "            additionalProperties: false\r",
+                  "        },\r",
+                  "        additionalneeds: { type: \"string\" }\r",
+                  "    },\r",
+                  "    required: [\r",
+                  "        \"firstname\",\r",
+                  "        \"lastname\",\r",
+                  "        \"totalprice\",\r",
+                  "        \"depositpaid\",\r",
+                  "        \"bookingdates\"\r",
+                  "    ],\r",
+                  "    additionalProperties: false\r",
+                  "};\r",
+                  "\r",
+                  "pm.test(\"Booking schema is valid\", function () {\r",
+                  "    pm.response.to.have.jsonSchema(schema);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/booking/{{bookingId}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "booking",
+                "{{bookingId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "password",
+        "value": "password123",
+        "type": "string"
+      },
+      {
+        "key": "username",
+        "value": "admin",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "bookingId",
+      "value": ""
+    }
+  ]
+}
